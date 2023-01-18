@@ -1,0 +1,45 @@
+{
+    "name": "evm-contracts",
+    "version": "v0.0.1",
+    "description": "Evm Smart Contracts",
+    "bugs": {
+        "url": "https://github.com/oceanprotocol/contracts/issues"
+    },
+    "homepage": "https://github.com/oceanprotocol/contracts#readme",
+    "main": "README.md",
+    "directories": {
+        "doc": "docs",
+        "test": "test"
+    },
+    "files": [
+        "artifacts/**/*",
+        "addresses/*",
+        "README.md"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/oceanprotocol/contracts.git"
+    },
+    "author": "Soon Huat, Phan",
+    "license": "Apache-2.0",
+    "scripts": {},
+    "devDependencies": {
+        "@nomiclabs/hardhat-ethers": "^2.1.1",
+        "@nomiclabs/hardhat-etherscan": "^3.1.5",
+        "@nomiclabs/hardhat-vyper": "^3.0.2",
+        "@nomiclabs/hardhat-waffle": "^2.0.3",
+        "@openzeppelin/contracts": "^4.8.1",
+        "@openzeppelin/test-helpers": "^0.5.15",
+        "chai": "^4.3.6",
+        "dotenv": "^16.0.0",
+        "eth-permit": "^0.2.3",
+        "ethereum-waffle": "^3.4.4",
+        "ethereumjs-util": "^7.1.5",
+        "ethers": "^5.7.0",
+        "hardhat": "^2.10.2",
+        "hardhat-contract-sizer": "^2.7.0",
+        "hardhat-gas-reporter": "^1.0.9",
+        "solidity-bytes-utils": "^0.8.0",
+        "solidity-coverage": "^0.7.22"
+    }
+}

@@ -1,0 +1,15 @@
+.env
+# Code Climate files
+coverage/
+# Node.js files
+node_modules/
+# Hardhat files
+cache/
+uncompiled/
+# Python package files
+build/
+venv/
+dist/
+**/__init__.py
+#hardhat debug files
+**/.dbg.json

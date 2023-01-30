@@ -62,9 +62,36 @@ async function main() {
   let sleepAmount = 10;
   let additionalApprovedTokens = []
   console.log("Using chain " + networkDetails.chainId);
+  const networkName = "polygonedge";
+
+  let options
+  if (gasPrice) {
+    options = { gasLimit: gasLimit, gasPrice: gasPrice }
+  }
+  else {
+    options = { gasLimit }
+  }
+  const addressFile = process.env.ADDRESS_FILE;
+  let oldAddresses;
+  if (addressFile) {
+    try {
+      oldAddresses = JSON.parse(fs.readFileSync(addressFile));
+    } catch (e) {
+      console.log(e);
+      oldAddresses = {};
+    }
+    if (!oldAddresses[networkName]) oldAddresses[networkName] = {};
+    addresses = oldAddresses[networkName];
+  }
+  if (logging)
+    console.info(
+      "Use existing addresses:" + JSON.stringify(addresses, null, 2)
+    );
+
+  addresses.chainId = networkDetails.chainId;
   if (logging) console.info("Deploying OceanToken");
-  const Ocean = await ethers.getContractFactory("UChildAdministrableERC20", owner);
-  const ocean = await Ocean.connect(owner).deploy(owner.address, options);
+  const Ocean = await ethers.getContractFactory("Stablecoin", owner);
+  const ocean = await Ocean.connect(owner).deploy("USD Coin", "USDC", 6, options);
   await ocean.deployTransaction.wait();
   addresses.Ocean = ocean.address;
   if (show_verify) {

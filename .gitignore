@@ -13,3 +13,6 @@ dist/
 **/__init__.py
 #hardhat debug files
 **/.dbg.json
+*.zip
+.DS_Store
+artifacts/

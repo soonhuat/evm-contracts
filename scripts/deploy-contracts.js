@@ -4,19 +4,9 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const fs = require("fs");
 const { Wallet } = require("ethers");
-const { UV_FS_O_FILEMAP } = require("constants");
 const ethers = hre.ethers;
 require("dotenv").config();
-const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD"
-let shouldDeployV4 = true;
-let shouldDeployDF = true;
-let shouldDeployVE = true;
-let shouldDeployOceanToken = false;
-let shouldDeployMocks = false;
-let shouldDeployOPFCommunityFeeCollector = false;
-let shouldDeployOPFCommunity = true;
 const logging = true;
 const show_verify = true;
 
@@ -28,19 +18,16 @@ async function main() {
     console.error("Missing NETWORK_RPC_URL. Aborting..");
     return null;
   }
-  if (!process.env.ADDRESS_FILE) {
-    console.error("Missing ADDRESS_FILE. Aborting..");
-    return null;
-  }
+  
   const connection = {
-    url:url,
+    url: url,
     headers: { "User-Agent" : "Soon Huat Deployer"}
   };
   const provider = new ethers.providers.StaticJsonRpcProvider(connection);
   const network = provider.getNetwork();
   // utils
   const networkDetails = await network;
-
+  console.log("Using networkDetails: ", networkDetails);
 
   let wallet;
   if (process.env.MNEMONIC)
@@ -51,16 +38,8 @@ async function main() {
     return null;
   }
   owner = wallet.connect(provider);
-  //let OPFOwner = '0x7DF5273aD9A6fCce64D45c64c1E43cfb6F861725';
-  let OPFOwner = null;
-  let routerOwner = null
-  let OPFCommunityFeeCollectorAddress;
-  let productionNetwork = false;
-  let OceanTokenAddress;
   let gasLimit = 8000000;
   let gasPrice = null;
-  let sleepAmount = 10;
-  let additionalApprovedTokens = []
   console.log("Using chain " + networkDetails.chainId);
   const networkName = "polygonedge";
 
@@ -71,32 +50,14 @@ async function main() {
   else {
     options = { gasLimit }
   }
-  const addressFile = process.env.ADDRESS_FILE;
-  let oldAddresses;
-  if (addressFile) {
-    try {
-      oldAddresses = JSON.parse(fs.readFileSync(addressFile));
-    } catch (e) {
-      console.log(e);
-      oldAddresses = {};
-    }
-    if (!oldAddresses[networkName]) oldAddresses[networkName] = {};
-    addresses = oldAddresses[networkName];
-  }
-  if (logging)
-    console.info(
-      "Use existing addresses:" + JSON.stringify(addresses, null, 2)
-    );
-
-  addresses.chainId = networkDetails.chainId;
-  if (logging) console.info("Deploying OceanToken");
-  const Ocean = await ethers.getContractFactory("Stablecoin", owner);
-  const ocean = await Ocean.connect(owner).deploy("USD Coin", "USDC", 6, options);
-  await ocean.deployTransaction.wait();
-  addresses.Ocean = ocean.address;
+  
+  if (logging) console.info("Deploying Stablecoin");
+  const contract = await ethers.getContractFactory("Stablecoin", owner);
+  const tx = await contract.connect(owner).deploy("USD Coin", "USDC", 6, options);
+  await tx.deployTransaction.wait();
   if (show_verify) {
     console.log("\tRun the following to verify on etherscan");
-    console.log("\tnpx hardhat verify --network " + networkName + " " + ocean.address + " " + owner.address)
+    console.log("\tnpx hardhat verify --network " + networkName + " " + tx.address + " " + owner.address)
   }
 }
 

@@ -61,14 +61,6 @@ async function main() {
   }
 }
 
-
-async function sleep(s) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, s * 1000)
-  })
-}
-
-
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()

@@ -4,21 +4,10 @@
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
-const fs = require("fs");
 const { Wallet } = require("ethers");
-const { UV_FS_O_FILEMAP } = require("constants");
 const ethers = hre.ethers;
 require("dotenv").config();
-const DEAD_ADDRESS = "0x000000000000000000000000000000000000dEaD"
-let shouldDeployV4 = true;
-let shouldDeployDF = true;
-let shouldDeployVE = true;
-let shouldDeployOceanToken = false;
-let shouldDeployMocks = false;
-let shouldDeployOPFCommunityFeeCollector = false;
-let shouldDeployOPFCommunity = true;
 const logging = true;
-const show_verify = true;
 
 
 async function main() {
@@ -28,19 +17,14 @@ async function main() {
     console.error("Missing NETWORK_RPC_URL. Aborting..");
     return null;
   }
-  if (!process.env.ADDRESS_FILE) {
-    console.error("Missing ADDRESS_FILE. Aborting..");
-    return null;
-  }
   const connection = {
     url:url,
-    headers: { "User-Agent" : "Soon Huat Deployer"}
+    headers: { "User-Agent" : "Soon Huat Minter"}
   };
   const provider = new ethers.providers.StaticJsonRpcProvider(connection);
   const network = provider.getNetwork();
   // utils
   const networkDetails = await network;
-
 
   let wallet;
   if (process.env.MNEMONIC)
@@ -56,16 +40,8 @@ async function main() {
     process.env.PRIVATE_KEY,
     provider
 );
-  //let OPFOwner = '0x7DF5273aD9A6fCce64D45c64c1E43cfb6F861725';
-  let OPFOwner = null;
-  let routerOwner = null
-  let OPFCommunityFeeCollectorAddress;
-  let productionNetwork = false;
-  let OceanTokenAddress;
   let gasLimit = 8000000;
   let gasPrice = null;
-  let sleepAmount = 10;
-  let additionalApprovedTokens = []
   console.log("Using chain " + networkDetails.chainId);
   const networkName = "polygonedge";
 
@@ -76,44 +52,12 @@ async function main() {
   else {
     options = { gasLimit }
   }
-  const addressFile = process.env.ADDRESS_FILE;
-  let oldAddresses;
-  if (addressFile) {
-    try {
-      oldAddresses = JSON.parse(fs.readFileSync(addressFile));
-    } catch (e) {
-      console.log(e);
-      oldAddresses = {};
-    }
-    if (!oldAddresses[networkName]) oldAddresses[networkName] = {};
-    addresses = oldAddresses[networkName];
-  }
-  if (logging)
-    console.info(
-      "Use existing addresses:" + JSON.stringify(addresses, null, 2)
-    );
-
-  addresses.chainId = networkDetails.chainId;
-  if (logging) console.info("Deploying OceanToken");
-//   const coinContract = await ethers.getContractAt("Stablecoin", "0x1eCC490732D870E3d03D5Eb571BEbe32b59E655D", wallet);
-  const coinContract = await ethers.getContractAt("Stablecoin", "0x1eCC490732D870E3d03D5Eb571BEbe32b59E655D", signer);
-  const result = await coinContract.mint("0x2E33C6014222A47585605F8379a1877eaaF0ec13", 100);
+  
+  if (logging) console.info("Mint stablecoin USDC");
+  const coinContract = await ethers.getContractAt("Stablecoin", "0xD1cebf9fD739Ac932bC3fe37D8fDEe88A5d3dDce", signer);
+  const result = await coinContract.mint("0x972056A76c18712cD0ee76a257e96cD8e4e32836", 10000);
   console.log(result);
-  await result;
-  addresses.Ocean = ocean.address;
-  if (show_verify) {
-    console.log("\tRun the following to verify on etherscan");
-    console.log("\tnpx hardhat verify --network " + networkName + " " + ocean.address + " " + owner.address)
-  }
 }
-
-
-async function sleep(s) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, s * 1000)
-  })
-}
-
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

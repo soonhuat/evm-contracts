@@ -7,25 +7,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Stablecoin is ERC20Capped, Ownable {
+contract Stablecoin is ERC20, Ownable {
     using SafeMath for uint256;
 
     // Create a new role identifier for the minter role
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     mapping(address => uint256) private _balances;
-
     mapping(address => mapping(address => uint256)) private _allowances;
 
     uint8 DECIMALS = 6;
-    uint256 constant CAP = 1410000000;
-    uint256 TOTALSUPPLY = CAP.mul(uint256(10)**DECIMALS);
-
-    address[] private accounts = new address[](0);
-    mapping(address => bool) private tokenHolders;
+    uint256 _maxBalance = 0;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -40,17 +34,17 @@ contract Stablecoin is ERC20Capped, Ownable {
         string memory name_,
         string memory symbol_,
         uint8 decimals_
-    )
-        public
-        ERC20(name_, symbol_)
-        ERC20Capped(CAP.mul(uint256(10)**decimals_))
-        Ownable()
-    {
+    ) public ERC20(name_, symbol_) Ownable() {
         ERC20._mint(msg.sender, 10000 * 10**decimals_);
         DECIMALS = decimals_;
+        _maxBalance = 900 * 10**DECIMALS;
     }
 
-    function mint(address to, uint256 amount) external onlyOwner {
+    function mint(address to, uint256 amount) external {
+        require(
+            _maxBalance >= balanceOf(to) || msg.sender == owner(),
+            "You have too much balance."
+        );
         _mint(to, amount * 10**DECIMALS);
     }
 
